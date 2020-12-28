@@ -5,6 +5,7 @@ const chalk = require("chalk");
 const path = require("path");
 const logger = require("morgan");
 const expressStatusMonitor = require("express-status-monitor");
+const errorHandler = require("errorhandler");
 
 dotenv.config({ path: ".env" });
 
@@ -42,6 +43,18 @@ app.use(express.static(path.join(__dirname, "/public")));
 app.get("/", (req, res, next) => {
   res.render("index.html");
 });
+
+/**
+ * Error handler
+ */
+if (process.env.NODE_ENV === "development") {
+  app.use(errorHandler());
+} else {
+  app.use((err, req, res, next) => {
+    console.error(err);
+    res.status(500).send("Internal Error");
+  });
+}
 
 /**
  * Start Express Server
