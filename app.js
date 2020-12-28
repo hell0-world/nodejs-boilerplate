@@ -6,6 +6,7 @@ const path = require("path");
 const logger = require("morgan");
 const expressStatusMonitor = require("express-status-monitor");
 const errorHandler = require("errorhandler");
+const bodyParser = require("body-parser");
 
 dotenv.config({ path: ".env" });
 
@@ -37,7 +38,8 @@ app.disable("x-powered-by");
 app.set("view engine", "pug");
 app.use(expressStatusMonitor());
 app.use(logger("dev"));
-
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "/public")));
 
 app.get("/", (req, res, next) => {
