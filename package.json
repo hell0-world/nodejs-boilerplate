@@ -1,0 +1,27 @@
+{
+  "name": "nodejs-boilerplate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hell0-world/nodejs-boilerplate.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hell0-world/nodejs-boilerplate/issues"
+  },
+  "homepage": "https://github.com/hell0-world/nodejs-boilerplate#readme",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.11.8",
+    "pug": "^3.0.0"
+  }
+}
