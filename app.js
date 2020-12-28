@@ -7,6 +7,7 @@ const logger = require("morgan");
 const expressStatusMonitor = require("express-status-monitor");
 const errorHandler = require("errorhandler");
 const bodyParser = require("body-parser");
+const compression = require("compression");
 
 dotenv.config({ path: ".env" });
 
@@ -37,6 +38,7 @@ app.set("port", process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 3000);
 app.disable("x-powered-by");
 app.set("view engine", "pug");
 app.use(expressStatusMonitor());
+app.use(compression());
 app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
