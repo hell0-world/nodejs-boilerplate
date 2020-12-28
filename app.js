@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const chalk = require("chalk");
 const path = require("path");
+const logger = require("morgan");
 const expressStatusMonitor = require("express-status-monitor");
 
 dotenv.config({ path: ".env" });
@@ -34,6 +35,7 @@ app.set("port", process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 3000);
 app.disable("x-powered-by");
 app.set("view engine", "pug");
 app.use(expressStatusMonitor());
+app.use(logger("dev"));
 
 app.use(express.static(path.join(__dirname, "/public")));
 
