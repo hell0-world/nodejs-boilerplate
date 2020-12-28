@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/hell0-world/nodejs-boilerplate#readme",
   "dependencies": {
+    "bcrypt": "^5.0.0",
     "chalk": "^4.1.0",
     "dotenv": "^8.2.0",
     "errorhandler": "^1.5.1",
