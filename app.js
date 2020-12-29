@@ -10,9 +10,18 @@ const bodyParser = require("body-parser");
 const compression = require("compression");
 const session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
+const passport = require("passport");
 
 dotenv.config({ path: ".env" });
 
+/**
+ * Passport configuration
+ */
+const passportConfig = require("./config/passport");
+
+/**
+ * Create Express server
+ */
 const app = express();
 
 /**
@@ -57,7 +66,12 @@ app.use(
     })
   })
 );
+app.use(passport.initialize());
+app.use(passport.session());
 
+/**
+ * Primary app routes
+ */
 app.get("/", (req, res, next) => {
   res.render("index.html");
 });
