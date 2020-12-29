@@ -37,6 +37,9 @@ passport.use(
   })
 );
 
+/**
+ * Login Required middleware
+ */
 exports.isAuthorized = (req, res, next) => {
   if (req.isAuthorized()) return next();
   res.redirect("/login");
