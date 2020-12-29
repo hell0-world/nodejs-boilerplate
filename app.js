@@ -8,6 +8,8 @@ const expressStatusMonitor = require("express-status-monitor");
 const errorHandler = require("errorhandler");
 const bodyParser = require("body-parser");
 const compression = require("compression");
+const session = require("express-session");
+const MongoStore = require("connect-mongo")(session);
 
 dotenv.config({ path: ".env" });
 
@@ -43,6 +45,18 @@ app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "/public")));
+app.use(
+  session({
+    resave: true,
+    saveUninitialized: true,
+    secret: process.env.SESSION_SECRET,
+    cookie: { maxAge: 12096000000 },
+    store: new MongoStore({
+      url: process.env.MONGODB_URI,
+      autoReconnect: true
+    })
+  })
+);
 
 app.get("/", (req, res, next) => {
   res.render("index.html");
