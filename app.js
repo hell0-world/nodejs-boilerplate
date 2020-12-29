@@ -1,3 +1,6 @@
+/**
+ * Module dependencies
+ */
 const express = require("express");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
@@ -12,7 +15,15 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
 const passport = require("passport");
 
+/**
+ * Load environment variables from .env
+ */
 dotenv.config({ path: ".env" });
+
+/**
+ * Controllers
+ */
+const userController = require("./controllers/user");
 
 /**
  * Passport configuration
@@ -68,6 +79,10 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+app.use((req, res, next) => {
+  res.locals.user = req.user;
+  next();
+});
 
 /**
  * Primary app routes
@@ -75,6 +90,8 @@ app.use(passport.session());
 app.get("/", (req, res, next) => {
   res.render("index.html");
 });
+app.post("/login", userController.postLogin);
+app.post("/signup", userController.postSignup);
 
 /**
  * Error handler
@@ -84,7 +101,7 @@ if (process.env.NODE_ENV === "development") {
 } else {
   app.use((err, req, res, next) => {
     console.error(err);
-    res.status(500).send("Internal Error");
+    res.status(500).send({ err });
   });
 }
 
