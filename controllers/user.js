@@ -27,7 +27,7 @@ exports.postLogin = (req, res, next) => {
     if (!user) return next(info);
     req.logIn(user, err => {
       if (err) return next(err);
-      res.status(200).send({ user });
+      res.status(200).send(req.session);
     });
   })(req, res, next);
 };

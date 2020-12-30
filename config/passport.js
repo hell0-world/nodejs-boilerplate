@@ -1,6 +1,7 @@
 const passport = require("passport");
 const _ = require("lodash");
 const { Strategy: Localstrategy } = require("passport-local");
+const { Strategy: JWTstrategy } = require("passport-jwt");
 
 const User = require("../models/User");
 
@@ -35,6 +36,22 @@ passport.use(
       });
     });
   })
+);
+
+/**
+ * Verify with JWT token
+ */
+passport.use(
+  new JWTstrategy(
+    {
+      jwtFromRequest: req.cookies.jwt,
+      secretOrKey: process.env.JWT_SECRET
+    },
+    (jwtPayload, done) => {
+      if (Date.now() > jwtPayload.expires) return done("jwt expired");
+      return done(null, jwtPayload);
+    }
+  )
 );
 
 /**
