@@ -12,8 +12,6 @@ const errorHandler = require("errorhandler");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const compression = require("compression");
-const session = require("express-session");
-const MongoStore = require("connect-mongo")(session);
 const passport = require("passport");
 
 /**
@@ -67,20 +65,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "/public")));
-// app.use(
-//   session({
-//     resave: true,
-//     saveUninitialized: true,
-//     secret: process.env.SESSION_SECRET,
-//     cookie: { maxAge: 12096000000 },
-//     store: new MongoStore({
-//       url: process.env.MONGODB_URI,
-//       autoReconnect: true
-//     })
-//   })
-// );
 app.use(passport.initialize());
-// app.use(passport.session());
 app.use((req, res, next) => {
   res.locals.user = req.user;
   next();
