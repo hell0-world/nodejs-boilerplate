@@ -88,7 +88,7 @@ exports.getUser = (req, res, next) => {
 
     User.findOne({ email: payload.email }, (err, user) => {
       if (err) return next(err);
-      if (!user) return next("user does not exist");
+      if (!user) return next("no matching user found");
       res.status(200).send({ email: user.email });
     });
   })(req, res, next);
