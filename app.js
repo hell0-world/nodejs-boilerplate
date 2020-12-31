@@ -76,7 +76,7 @@ app.use((req, res, next) => {
  */
 app.post("/login", userController.postLogin);
 app.post("/signup", userController.postSignup);
-app.get("/user", userController.getUser);
+app.get("/user", passportConfig.checkAuth, userController.getUser);
 
 /**
  * Error handler

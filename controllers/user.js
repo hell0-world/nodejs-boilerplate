@@ -82,14 +82,9 @@ exports.postSignup = (req, res, next) => {
  * Get user data
  */
 exports.getUser = (req, res, next) => {
-  passport.authenticate("jwt", { session: false }, (err, payload, info) => {
+  User.findOne({ email: req.user.email }, (err, user) => {
     if (err) return next(err);
-    if (!payload) return next(info);
-
-    User.findOne({ email: payload.email }, (err, user) => {
-      if (err) return next(err);
-      if (!user) return next("no matching user found");
-      res.status(200).send({ email: user.email });
-    });
-  })(req, res, next);
+    if (!user) return next("no matching user found");
+    res.status(200).send({ email: user.email });
+  });
 };

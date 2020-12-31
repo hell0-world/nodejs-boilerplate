@@ -9,23 +9,30 @@ const User = require("../models/User");
  * Sign in using Email and Password
  */
 passport.use(
-  new Localstrategy({ usernameField: "email" }, (email, password, done) => {
-    User.findOne({ email: email.toLowerCase() }, (err, user) => {
-      if (err) return done(err);
-      if (!user) return done(null, false, { msg: `Email ${email} not found` });
-      if (!user.password) {
-        return done(null, false, {
-          msg:
-            "Your account was registered using a sign-in provider. To  password login, sign in using a provider, and then set a password under your user profile."
-        });
-      }
-      user.comparePassword(password, (err, isMatch) => {
+  new Localstrategy(
+    { usernameField: "email", passwordField: "password" },
+    (email, password, done) => {
+      User.findOne({ email: email.toLowerCase() }, (err, user) => {
         if (err) return done(err);
-        if (isMatch) return done(null, user);
-        return done(null, false, { msg: "Invalid email or password" });
+        if (!user)
+          return done(null, false, { msg: `Email ${email} not found` });
+        /**
+         * Add below code after add 3rd party login api
+         */
+        // if (!user.password) {
+        //   return done(null, false, {
+        //     msg:
+        //       "Your account was registered using a sign-in provider. To  password login, sign in using a provider, and then set a password under your user profile."
+        //   });
+        // }
+        user.comparePassword(password, (err, isMatch) => {
+          if (err) return done(err);
+          if (isMatch) return done(null, user);
+          return done(null, false, { msg: "Invalid email or password" });
+        });
       });
-    });
-  })
+    }
+  )
 );
 
 /**
@@ -45,3 +52,19 @@ passport.use(
     }
   )
 );
+
+/**
+ * Check authentication
+ */
+exports.checkAuth = (req, res, next) => {
+  passport.authenticate("jwt", { session: false }, (err, payload, info) => {
+    if (err) return next(err);
+    if (!payload) return next(info);
+
+    User.findOne({ email: payload.email }, (err, user) => {
+      if (err) return next(err);
+      if (!user) return next("no matching user found");
+      res.status(200).send({ email: user.email });
+    });
+  })(req, res, next);
+};
