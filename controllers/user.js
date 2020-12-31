@@ -2,6 +2,7 @@ const passport = require("passport");
 const _ = require("lodash");
 const User = require("../models/User");
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
 
 /**
  * POST /login
@@ -22,12 +23,20 @@ exports.postLogin = (req, res, next) => {
     gmail_remove_dots: false
   });
 
-  passport.authenticate("local", (err, user, info) => {
+  passport.authenticate("local", { session: false }, (err, user, info) => {
     if (err) return next(err);
     if (!user) return next(info);
-    req.logIn(user, err => {
+
+    const payload = {
+      email: user.email,
+      expires: Date.now() + parseInt(process.env.JWT_EXPIRATION_MS)
+    };
+
+    req.logIn(user, { session: false }, err => {
       if (err) return next(err);
-      res.status(200).send(req.session);
+      const token = jwt.sign(JSON.stringify(payload), process.env.JWT_SECRET);
+      res.cookie("jwt", token, { httpOnly: true });
+      res.status(200).send({ email: user.email });
     });
   })(req, res, next);
 };
@@ -63,10 +72,24 @@ exports.postSignup = (req, res, next) => {
     if (existingUser) return next("user already exist");
     user.save(err => {
       if (err) return next(err);
-      req.logIn(user, err => {
-        if (err) return next(err);
-        res.sendStatus(201);
-      });
+      res.status(201).send({ email: user.email });
     });
   });
+};
+
+/**
+ * GET /user
+ * Get user data
+ */
+exports.getUser = (req, res, next) => {
+  passport.authenticate("jwt", { session: false }, (err, payload, info) => {
+    if (err) return next(err);
+    if (!payload) return next(info);
+
+    User.findOne({ email: payload.email }, (err, user) => {
+      if (err) return next(err);
+      if (!user) return next("user does not exist");
+      res.status(200).send({ email: user.email });
+    });
+  })(req, res, next);
 };

@@ -5,16 +5,6 @@ const { Strategy: JWTstrategy } = require("passport-jwt");
 
 const User = require("../models/User");
 
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser((id, done) => {
-  User.findById(id, (err, user) => {
-    done(err, user);
-  });
-});
-
 /**
  * Sign in using Email and Password
  */
@@ -44,20 +34,14 @@ passport.use(
 passport.use(
   new JWTstrategy(
     {
-      jwtFromRequest: req.cookies.jwt,
+      jwtFromRequest: req => req.cookies.jwt,
       secretOrKey: process.env.JWT_SECRET
     },
     (jwtPayload, done) => {
-      if (Date.now() > jwtPayload.expires) return done("jwt expired");
+      if (Date.now() > jwtPayload.expires) {
+        return done("jwt expired");
+      }
       return done(null, jwtPayload);
     }
   )
 );
-
-/**
- * Login Required middleware
- */
-exports.isAuthorized = (req, res, next) => {
-  if (req.isAuthorized()) return next();
-  res.redirect("/login");
-};

@@ -10,6 +10,7 @@ const logger = require("morgan");
 const expressStatusMonitor = require("express-status-monitor");
 const errorHandler = require("errorhandler");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const compression = require("compression");
 const session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
@@ -62,23 +63,24 @@ app.set("view engine", "pug");
 app.use(expressStatusMonitor());
 app.use(compression());
 app.use(logger("dev"));
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "/public")));
-app.use(
-  session({
-    resave: true,
-    saveUninitialized: true,
-    secret: process.env.SESSION_SECRET,
-    cookie: { maxAge: 12096000000 },
-    store: new MongoStore({
-      url: process.env.MONGODB_URI,
-      autoReconnect: true
-    })
-  })
-);
+// app.use(
+//   session({
+//     resave: true,
+//     saveUninitialized: true,
+//     secret: process.env.SESSION_SECRET,
+//     cookie: { maxAge: 12096000000 },
+//     store: new MongoStore({
+//       url: process.env.MONGODB_URI,
+//       autoReconnect: true
+//     })
+//   })
+// );
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 app.use((req, res, next) => {
   res.locals.user = req.user;
   next();
@@ -87,11 +89,9 @@ app.use((req, res, next) => {
 /**
  * Primary app routes
  */
-app.get("/", (req, res, next) => {
-  res.render("index.html");
-});
 app.post("/login", userController.postLogin);
 app.post("/signup", userController.postSignup);
+app.get("/user", userController.getUser);
 
 /**
  * Error handler
