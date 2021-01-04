@@ -74,8 +74,9 @@ app.use((req, res, next) => {
 /**
  * Primary app routes
  */
-app.post("/login", userController.postLogin);
 app.post("/signup", userController.postSignup);
+app.post("/login", userController.postLogin);
+app.get("/logout", userController.logout);
 app.get("/user", passportConfig.checkAuth, userController.getUser);
 
 /**

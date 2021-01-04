@@ -88,3 +88,12 @@ exports.getUser = (req, res, next) => {
     res.status(200).send({ email: user.email });
   });
 };
+
+/**
+ * GET /logout
+ * Log out
+ */
+exports.logout = (req, res) => {
+  req.logout();
+  res.sendStatus(205);
+};
