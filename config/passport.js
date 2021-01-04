@@ -56,11 +56,4 @@ passport.use(
 /**
  * Check authentication
  */
-exports.checkAuth = (req, res, next) => {
-  passport.authenticate("jwt", { session: false }, (err, payload, info) => {
-    if (err) return next(err);
-    if (!payload) return next(info);
-    req.user = payload;
-    next();
-  })(req, res, next);
-};
+exports.checkAuth = passport.authenticate("jwt", { session: false });
