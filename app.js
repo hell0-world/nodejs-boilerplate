@@ -66,10 +66,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "/public")));
 app.use(passport.initialize());
-app.use((req, res, next) => {
-  res.locals.user = req.user;
-  next();
-});
 
 /**
  * Primary app routes
@@ -78,6 +74,16 @@ app.post("/signup", userController.postSignup);
 app.post("/login", userController.postLogin);
 app.get("/logout", userController.logout);
 app.get("/user", passportConfig.checkAuth, userController.getUser);
+app.get(
+  "/user/verify",
+  passportConfig.checkAuth,
+  userController.getVerifyEmail
+);
+app.get(
+  "/user/verify/:token",
+  passportConfig.checkAuth,
+  userController.getVerifyEmailToken
+);
 
 /**
  * Error handler

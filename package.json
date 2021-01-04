@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/hell0-world/nodejs-boilerplate#readme",
   "dependencies": {
+    "aws-sdk": "^2.820.0",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "chalk": "^4.1.0",
@@ -29,8 +30,10 @@
     "express-status-monitor": "^1.3.3",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
+    "mailchecker": "^4.0.3",
     "mongoose": "^5.11.8",
     "morgan": "^1.10.0",
+    "nodemailer": "^6.4.17",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",

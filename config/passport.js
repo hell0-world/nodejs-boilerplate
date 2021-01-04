@@ -4,7 +4,6 @@ const { Strategy: Localstrategy } = require("passport-local");
 const { Strategy: JWTstrategy } = require("passport-jwt");
 
 const User = require("../models/User");
-
 /**
  * Sign in using Email and Password
  */
