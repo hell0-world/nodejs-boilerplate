@@ -134,6 +134,7 @@ exports.logout = (req, res) => {
  */
 exports.getVerifyEmail = (req, res, next) => {
   User.findOne({ email: req.user.email }).then(user => {
+    if (!user) return next("User doesn't exist.");
     if (user.emailVerified) return next("The email address has been verified.");
 
     if (!mailChecker.isValid(req.user.email))
