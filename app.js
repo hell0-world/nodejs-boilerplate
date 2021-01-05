@@ -74,6 +74,11 @@ app.post("/signup", userController.postSignup);
 app.post("/login", userController.postLogin);
 app.get("/logout", userController.logout);
 app.get("/user", passportConfig.checkAuth, userController.getUser);
+app.put(
+  "/user/password",
+  passportConfig.checkAuth,
+  userController.putUpdatePassword
+);
 app.get(
   "/user/verify",
   passportConfig.checkAuth,

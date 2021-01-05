@@ -120,6 +120,31 @@ exports.getUser = (req, res, next) => {
 };
 
 /**
+ * PUT /user/password
+ * Update current password
+ */
+exports.putUpdatePassword = (req, res, next) => {
+  const validationErrors = [];
+  if (!validator.isLength(req.body.password, { min: 8 }))
+    validationErrors.push({
+      msg: "Password must be at least 8 characters long"
+    });
+  if (req.body.password !== req.body.confirmPassword)
+    validationErrors.push({ msg: "Passwords do not match" });
+
+  if (validationErrors.length) return next(validationErrors);
+
+  User.findOne({ email: req.user.email }, (err, user) => {
+    if (err) return next(err);
+    user.password = req.body.password;
+    user.save(err => {
+      if (err) return next(err);
+      res.sendStatus(200);
+    });
+  });
+};
+
+/**
  * GET /logout
  * Log out
  */
@@ -192,7 +217,7 @@ exports.getVerifyEmail = (req, res, next) => {
 exports.getVerifyEmailToken = (req, res, next) => {
   User.findOne({ email: req.user.email })
     .then(user => {
-      if (!user) next("User does not exists.");
+      if (!user) next("User does not exist.");
       if (user.emailVerified)
         return next("The email address has been verified.");
 
