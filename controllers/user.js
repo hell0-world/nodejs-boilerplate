@@ -183,8 +183,8 @@ exports.getVerifyEmail = (req, res, next) => {
         from: "pkpk5087@gmail.com",
         subject: "Please verify your email address",
         text: `Thank you for registering with this app.\n\n
-        Please copy below verification code and paste to the app:\n\n
-        ${token}\n\n
+        This verify your email address please click on the following link, or paste this into your browser:\n\n
+        http://${req.headers.host}/user/verify/${token}\n\n
         \n\n
         Thank you!`
       };
@@ -215,26 +215,92 @@ exports.getVerifyEmail = (req, res, next) => {
  * Verify email address
  */
 exports.getVerifyEmailToken = (req, res, next) => {
-  User.findOne({ email: req.user.email })
-    .then(user => {
-      if (!user) next("User does not exist.");
-      if (user.emailVerified)
-        return next("The email address has been verified.");
+  const validationErrors = [];
+  if (req.params.token && !validator.isHexadecimal(req.params.token))
+    validationErrors.push({ msg: "Invalid Token.  Please retry." });
+  if (validationErrors.length) next(validationErrors);
 
-      const validationErrors = [];
-      if (req.params.token && !validator.isHexadecimal(req.params.token))
-        validationErrors.push({ msg: "Invalid Token.  Please retry." });
-      if (validationErrors.length) next(validationErrors);
+  User.findOne(
+    {
+      emailVerificationToken: req.params.token
+    },
+    (err, user) => {
+      if (err) return next(err);
+      if (!user) return next("User does not exist.");
 
       if (req.params.token === user.emailVerificationToken) {
         user.emailVerificationToken = "";
         user.emailVerified = true;
         user = user.save();
-        res.sendStatus(200);
+        res.render("verification", { title: "Email Verification" });
       } else
-        next(
-          "The verification code was invalid, or is for a different account."
+        return next(
+          "The verification code was invalid, or is for a different account"
         );
-    })
+    }
+  ).catch(next);
+};
+
+/**
+ * POST /forgot
+ * Create a random token, then send user an email with a reset token
+ */
+exports.postForgot = (req, res, next) => {
+  const validationErrors = [];
+  if (!validator.isEmail(req.body.email))
+    validationErrors.push({ msg: "Please enter a valid email address." });
+
+  if (validationErrors.length) return next(validationErrors);
+  req.body.email = validator.normalizeEmail(req.body.email, {
+    gmail_remove_dots: false
+  });
+
+  const createRandomToken = randomBytesAsync(16).then(buf =>
+    buf.toString("hex")
+  );
+
+  const setRandomToken = token =>
+    User.findOne({ email: req.body.email }).then(user => {
+      if (!user) return next("Account with that email address does not exist.");
+      else {
+        user.passwordResetToken = token;
+        user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+        user = user.save();
+      }
+      return user;
+    });
+
+  const sendForgotPasswordEmail = user => {
+    if (!user) {
+      return;
+    }
+    const token = user.passwordResetToken;
+    const mailOptions = {
+      to: user.email,
+      from: "pkpk5087@gmail.com",
+      subject: "Reset your password",
+      text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
+        Please click on the following link, or paste this into your browser to complete the process:\n\n
+        http://${req.headers.host}/reset/${token}\n\n
+        If you did not request this, please ignore this email and your password will remain unchanged.\n`
+    };
+    const mailSettings = {
+      successfulType: "info",
+      successfulMsg: `An e-mail has been sent to ${user.email} with further instructions.`,
+      loggingError:
+        "ERROR: Could not send forgot password email after security downgrade.\n",
+      errorType: "errors",
+      errorMsg:
+        "Error sending the password reset message. Please try again shortly.",
+      mailOptions,
+      req
+    };
+    return sendMail(mailSettings);
+  };
+
+  createRandomToken
+    .then(setRandomToken)
+    .then(sendForgotPasswordEmail)
+    .then(() => res.sendStatus(200))
     .catch(next);
 };

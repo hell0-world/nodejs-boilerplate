@@ -57,6 +57,7 @@ mongoose.connection.on("error", err => {
 app.set("host", process.env.OPENSHIFT_NODEJS_IP || "0.0.0.0");
 app.set("port", process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 3000);
 app.disable("x-powered-by");
+app.set("views", "./views");
 app.set("view engine", "pug");
 app.use(expressStatusMonitor());
 app.use(compression());
@@ -66,7 +67,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "/public")));
 app.use(passport.initialize());
-
 /**
  * Primary app routes
  */
@@ -74,6 +74,7 @@ app.post("/signup", userController.postSignup);
 app.post("/login", userController.postLogin);
 app.get("/logout", userController.logout);
 app.get("/user", passportConfig.checkAuth, userController.getUser);
+app.post("/forgot", userController.postForgot);
 app.put(
   "/user/password",
   passportConfig.checkAuth,
@@ -86,7 +87,7 @@ app.get(
 );
 app.get(
   "/user/verify/:token",
-  passportConfig.checkAuth,
+  //passportConfig.checkAuth,
   userController.getVerifyEmailToken
 );
 
