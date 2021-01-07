@@ -90,6 +90,7 @@ app.get(
   //passportConfig.checkAuth,
   userController.getVerifyEmailToken
 );
+app.get("/reset/:token", userController.getReset);
 
 /**
  * Error handler

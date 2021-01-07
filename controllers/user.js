@@ -9,6 +9,7 @@ const nodemailer = require("nodemailer");
 const mailChecker = require("mailchecker");
 const AWS = require("aws-sdk");
 AWS.config.loadFromPath(__dirname + "/../config/aws.json");
+const generatePassword = require("password-generator");
 
 const randomBytesAsync = promisify(crypto.randomBytes);
 
@@ -226,7 +227,7 @@ exports.getVerifyEmailToken = (req, res, next) => {
     },
     (err, user) => {
       if (err) return next(err);
-      if (!user) return next("User does not exist.");
+      if (!user) return next("User already verified or does not exist.");
 
       if (req.params.token === user.emailVerificationToken) {
         user.emailVerificationToken = "";
@@ -302,5 +303,60 @@ exports.postForgot = (req, res, next) => {
     .then(setRandomToken)
     .then(sendForgotPasswordEmail)
     .then(() => res.sendStatus(200))
+    .catch(next);
+};
+
+/**
+ * GET /reset/:token
+ * Reset Password Page
+ */
+exports.getReset = (req, res, next) => {
+  const validationErrors = [];
+  if (!validator.isHexadecimal(req.params.token))
+    validationErrors.push({ msg: "Invalid Token.  Please retry." });
+  if (validationErrors.length) return next(err);
+
+  const tempPassword = generatePassword();
+  const resetPassword = () =>
+    User.findOne({ passwordResetToken: req.params.token })
+      .where("passwordResetExpires")
+      .gt(Date.now())
+      .then(user => {
+        console.log("find result", user);
+        if (!user)
+          return next("Password reset token is invalid or has expired.");
+        user.password = tempPassword;
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        return user.save();
+      });
+
+  const sendResetPasswordEmail = user => {
+    if (!user) {
+      return;
+    }
+    const mailOptions = {
+      to: user.email,
+      from: "pkpk5087@gmail.com",
+      subject: "Your password has been changed",
+      text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n\nYour temporary password : ${tempPassword}\n`
+    };
+    const mailSettings = {
+      successfulType: "success",
+      successfulMsg: "Success! Your password has been changed.",
+      loggingError:
+        "ERROR: Could not send password reset confirmation email after security downgrade.\n",
+      errorType: "warning",
+      errorMsg:
+        "Your password has been changed, however we were unable to send you a confirmation email. We will be looking into it shortly.",
+      mailOptions,
+      req
+    };
+    return sendMail(mailSettings);
+  };
+
+  resetPassword()
+    .then(sendResetPasswordEmail)
+    .then(() => res.render("reset", { title: "Reset Password", tempPassword }))
     .catch(next);
 };
