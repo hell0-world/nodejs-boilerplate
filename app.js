@@ -77,6 +77,7 @@ app.get("/user", passportConfig.checkAuth, userController.getUser);
 app.post("/forgot", userController.postForgot);
 app.get("/user/verify/:token", userController.getVerifyEmailToken);
 app.get("/reset/:token", userController.getReset);
+app.post("/reset/:token", userController.postReset);
 app.put(
   "/user/password",
   passportConfig.checkAuth,

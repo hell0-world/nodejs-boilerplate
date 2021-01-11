@@ -316,7 +316,30 @@ exports.getReset = (req, res, next) => {
     validationErrors.push({ msg: "Invalid Token.  Please retry." });
   if (validationErrors.length) return next(err);
 
-  const tempPassword = generatePassword();
+  User.findOne({ passwordResetToken: req.params.token })
+    .where("passwordResetExpires")
+    .gt(Date.now())
+    .exec((err, user) => {
+      if (err) return next(err);
+      if (!user) return next("Password reset token is invalid or has expired");
+      res.render("reset2", { title: "Reset Password" });
+    });
+};
+
+/**
+ * POST /reset/:token
+ */
+exports.postReset = (req, res, next) => {
+  const validationErrors = [];
+  if (!validator.isLength(req.body.password, { min: 8 }))
+    validationErrors.push({
+      msg: "Password must be at least 8 characters long"
+    });
+  if (req.body.password !== req.body.confirmPassword)
+    validationErrors.push({ msg: "Passwords do not match" });
+  if (!validator.isHexadecimal(req.params.token))
+    validationErrors.push({ msg: "Invalid Token.  Please retry." });
+  if (validationErrors.length) return next(err);
 
   const resetPassword = () =>
     User.findOne({ passwordResetToken: req.params.token })
@@ -326,7 +349,7 @@ exports.getReset = (req, res, next) => {
         console.log("find result", user);
         if (!user)
           return next("Password reset token is invalid or has expired.");
-        user.password = tempPassword;
+        user.password = req.body.password;
         user.passwordResetToken = undefined;
         user.passwordResetExpires = undefined;
         return user.save();
@@ -340,7 +363,7 @@ exports.getReset = (req, res, next) => {
       to: user.email,
       from: "pkpk5087@gmail.com",
       subject: "Your password has been changed",
-      text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n\nYour temporary password : ${tempPassword}\n`
+      text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n`
     };
     const mailSettings = {
       successfulType: "success",

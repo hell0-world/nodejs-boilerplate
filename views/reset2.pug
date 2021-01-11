@@ -1,0 +1,15 @@
+html
+    head
+        title=_title
+    body
+        h3 Reset Password
+        form(method='POST')
+            input(type='hidden')
+            div 
+            label(for='password') New Password 
+            input.form-control(type='password', name='password', id='password', placeholder='New password', autofocus, autocomplete='new-password', minlength='8', required)
+            div
+            label(for='confirm') Confirm Password 
+            input.form-control(type='password', name='confirmPassword', id='confirmPassword', placeholder='Confirm password', autocomplete='new-password', minlength='8', required)
+            div
+            button(type="submit") Change Password
