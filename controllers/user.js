@@ -317,6 +317,7 @@ exports.getReset = (req, res, next) => {
   if (validationErrors.length) return next(err);
 
   const tempPassword = generatePassword();
+
   const resetPassword = () =>
     User.findOne({ passwordResetToken: req.params.token })
       .where("passwordResetExpires")
@@ -357,6 +358,17 @@ exports.getReset = (req, res, next) => {
 
   resetPassword()
     .then(sendResetPasswordEmail)
-    .then(() => res.render("reset", { title: "Reset Password", tempPassword }))
+    .then(() => res.render("reset", { title: "Reset Password" }))
     .catch(next);
+};
+
+/**
+ * DELETE /user
+ * Delete account
+ */
+exports.deleteDeleteAccount = (req, res, next) => {
+  User.deleteOne({ email: req.user.email }, err => {
+    if (err) return next(err);
+    res.sendStatus(200);
+  });
 };

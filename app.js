@@ -75,6 +75,8 @@ app.post("/login", userController.postLogin);
 app.get("/logout", userController.logout);
 app.get("/user", passportConfig.checkAuth, userController.getUser);
 app.post("/forgot", userController.postForgot);
+app.get("/user/verify/:token", userController.getVerifyEmailToken);
+app.get("/reset/:token", userController.getReset);
 app.put(
   "/user/password",
   passportConfig.checkAuth,
@@ -85,12 +87,11 @@ app.get(
   passportConfig.checkAuth,
   userController.getVerifyEmail
 );
-app.get(
-  "/user/verify/:token",
-  //passportConfig.checkAuth,
-  userController.getVerifyEmailToken
+app.delete(
+  "/user",
+  passportConfig.checkAuth,
+  userController.deleteDeleteAccount
 );
-app.get("/reset/:token", userController.getReset);
 
 /**
  * Error handler
